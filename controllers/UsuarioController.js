@@ -1,16 +1,14 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const Usuario = require('../models/Usuario');
 
 class UsuarioController {
     
-    
+    // Registro de usuario
     static async registro(req, res) {
         try {
             const { nombre, email, password, birthday, photo, rol } = req.body;
 
-           
             if (!nombre || !email || !password) {
                 return res.status(400).json({
                     success: false,
@@ -26,11 +24,8 @@ class UsuarioController {
                 });
             }
 
-           
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            const hashedPassword = await bcrypt.hash(password, 10);
 
-            
             const nuevoUsuario = new Usuario({
                 id: uuidv4(),
                 nombre,
@@ -38,30 +33,21 @@ class UsuarioController {
                 password: hashedPassword,
                 birthday: birthday ? new Date(birthday) : null,
                 photo: photo || null,
-                rol: rol === 'admin' ? 'admin' : 'usuario' 
+                rol: rol === 'admin' ? 'admin' : 'usuario'
             });
 
             await nuevoUsuario.save();
-
-          
-            const token = jwt.sign(
-                { id: nuevoUsuario.id, rol: nuevoUsuario.rol }, 
-                process.env.JWT_SECRET, 
-                { expiresIn: '7d' }
-            );
 
             res.status(201).json({
                 success: true,
                 message: 'Usuario registrado exitosamente',
                 data: {
-                    usuario: {
-                        id: nuevoUsuario.id,
-                        nombre: nuevoUsuario.nombre,
-                        email: nuevoUsuario.email,
-                        birthday: nuevoUsuario.birthday,
-                        photo: nuevoUsuario.photo
-                    },
-                    token
+                    id: nuevoUsuario.id,
+                    nombre: nuevoUsuario.nombre,
+                    email: nuevoUsuario.email,
+                    birthday: nuevoUsuario.birthday,
+                    photo: nuevoUsuario.photo,
+                    rol: nuevoUsuario.rol
                 }
             });
 
@@ -74,12 +60,11 @@ class UsuarioController {
         }
     }
 
-   
+    // Login
     static async login(req, res) {
         try {
             const { email, password } = req.body;
 
-            
             if (!email || !password) {
                 return res.status(400).json({
                     success: false,
@@ -87,7 +72,6 @@ class UsuarioController {
                 });
             }
 
-          
             const usuario = await Usuario.findOne({ email });
             if (!usuario) {
                 return res.status(401).json({
@@ -96,7 +80,6 @@ class UsuarioController {
                 });
             }
 
-            
             const passwordValida = await bcrypt.compare(password, usuario.password);
             if (!passwordValida) {
                 return res.status(401).json({
@@ -105,51 +88,16 @@ class UsuarioController {
                 });
             }
 
-          
-            const token = jwt.sign(
-                { id: usuario.id, rol: usuario.rol }, 
-                process.env.JWT_SECRET, 
-                { expiresIn: '7d' }
-            );
-
             res.json({
                 success: true,
                 message: 'Login exitoso',
-                data: {
-                    usuario: {
-                        id: usuario.id,
-                        nombre: usuario.nombre,
-                        email: usuario.email,
-                        birthday: usuario.birthday,
-                        photo: usuario.photo,
-                        rol: usuario.rol
-                    },
-                    token
-                }
-            });
-
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error interno del servidor',
-                error: error.message
-            });
-        }
-    }
-
-    
-    static async obtenerPerfil(req, res) {
-        try {
-            const usuario = req.usuario; 
-
-            res.json({
-                success: true,
                 data: {
                     id: usuario.id,
                     nombre: usuario.nombre,
                     email: usuario.email,
                     birthday: usuario.birthday,
-                    photo: usuario.photo
+                    photo: usuario.photo,
+                    rol: usuario.rol
                 }
             });
 
@@ -162,20 +110,47 @@ class UsuarioController {
         }
     }
 
-   
+    // Obtener perfil por ID
+    static async obtenerPerfil(req, res) {
+        try {
+            const { id } = req.params;
+
+            const usuario = await Usuario.findOne({ id }, '-password');
+
+            if (!usuario) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuario no encontrado'
+                });
+            }
+
+            res.json({
+                success: true,
+                data: usuario
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor',
+                error: error.message
+            });
+        }
+    }
+
+    // Actualizar perfil
     static async actualizarPerfil(req, res) {
         try {
+            const { id } = req.params;
             const { nombre, birthday, photo } = req.body;
-            const usuarioId = req.usuario.id;
 
-           
             const datosActualizados = {};
             if (nombre) datosActualizados.nombre = nombre;
             if (birthday) datosActualizados.birthday = new Date(birthday);
             if (photo) datosActualizados.photo = photo;
 
             const usuarioActualizado = await Usuario.findOneAndUpdate(
-                { id: usuarioId },
+                { id },
                 datosActualizados,
                 { new: true }
             );
@@ -208,7 +183,7 @@ class UsuarioController {
         }
     }
 
-    
+    // Obtener todos los usuarios
     static async obtenerTodosLosUsuarios(req, res) {
         try {
             const usuarios = await Usuario.find({}, '-password').sort({ createdAt: -1 });
@@ -218,6 +193,34 @@ class UsuarioController {
                 message: 'Usuarios obtenidos exitosamente',
                 count: usuarios.length,
                 data: usuarios
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor',
+                error: error.message
+            });
+        }
+    }
+
+    // Eliminar cuenta
+    static async eliminarCuenta(req, res) {
+        try {
+            const { id } = req.params;
+
+            const usuarioEliminado = await Usuario.findOneAndDelete({ id });
+
+            if (!usuarioEliminado) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuario no encontrado'
+                });
+            }
+
+            res.json({
+                success: true,
+                message: 'Cuenta eliminada exitosamente'
             });
 
         } catch (error) {

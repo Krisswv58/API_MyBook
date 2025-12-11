@@ -1,22 +1,21 @@
-const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 
-const authMiddleware = async (req, res, next) => {
+// Middleware para validar que el usuario existe
+const validarUsuario = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
-        
-        if (!token) {
-            return res.status(401).json({
+        const usuarioId = req.body.usuarioId || req.params.id || req.query.usuarioId;
+
+        if (!usuarioId) {
+            return res.status(400).json({
                 success: false,
-                message: 'No hay token, acceso denegado'
+                message: 'usuarioId es requerido'
             });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const usuario = await Usuario.findOne({ id: decoded.id });
+        const usuario = await Usuario.findOne({ id: usuarioId });
         
         if (!usuario) {
-            return res.status(401).json({
+            return res.status(404).json({
                 success: false,
                 message: 'Usuario no encontrado'
             });
@@ -26,11 +25,52 @@ const authMiddleware = async (req, res, next) => {
         next();
 
     } catch (error) {
-        res.status(401).json({
+        res.status(500).json({
             success: false,
-            message: 'Token inválido'
+            message: 'Error en validación de usuario',
+            error: error.message
         });
     }
 };
 
-module.exports = authMiddleware;
+// Middleware para validar que el usuario es admin
+const validarAdmin = async (req, res, next) => {
+    try {
+        const usuarioId = req.body.usuarioId || req.params.id || req.query.usuarioId;
+
+        if (!usuarioId) {
+            return res.status(400).json({
+                success: false,
+                message: 'usuarioId es requerido para operaciones de admin'
+            });
+        }
+
+        const usuario = await Usuario.findOne({ id: usuarioId });
+        
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        if (usuario.rol !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Acceso denegado. Solo administradores'
+            });
+        }
+
+        req.usuario = usuario;
+        next();
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error en validación de admin',
+            error: error.message
+        });
+    }
+};
+
+module.exports = { validarUsuario, validarAdmin };
