@@ -1,101 +1,64 @@
-# API My Book - Backend Node.js
+# API My Book
 
-API REST para gestión de libros digitales con Azure Cosmos DB y Azure Blob Storage.
+## URL de la API en Producción
 
-## Características
-
-- CRUD de usuarios
-- CRUD de libros con filtros avanzados
-- Upload de archivos a Azure Blob Storage
-- Base de datos Azure Cosmos DB (MongoDB API)
-- Gestión de libros públicos y privados
-- Sistema de ocultación de libros por usuario
-
-## Instalación
-
-```bash
-npm install
 ```
-
-## Configuración
-
-Archivo `.env`:
-
-```env
-MONGODB_URI=tu_conexion_cosmos_db
-PORT=3000
-AZURE_STORAGE_CONNECTION_STRING=tu_conexion_string
-AZURE_STORAGE_CONTAINER_IMAGENES=imagenes
-AZURE_STORAGE_CONTAINER_PDFS=pdfs
+https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api
 ```
-
-## Ejecución
-
-```bash
-# Desarrollo
-npm run dev
-
-# Producción
-npm start
-
-# Inicializar datos
-node scripts/inicializarDatosConDrive.js
-```
-
-## URLs
-
-- **Local**: http://localhost:3000/api
-- **Producción**: https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api
 
 ---
 
-## Endpoints API
+## Endpoints
 
 ### USUARIOS
 
-#### Registro
-```http
-POST /api/usuarios/registro
-Content-Type: application/json
+#### 1. Registro de Usuario
 
+**POST** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/usuarios/registro`
+
+**Request:**
+```json
 {
-  "nombre": "Juan Pérez",
-  "email": "juan@example.com",
+  "nombre": "Viviana Campos",
+  "email": "viviana@example.com",
   "password": "password123",
   "birthday": "1990-01-01",
-  "photo": "https://...",
+  "photo": "https://ejemplo.com/foto.jpg",
   "rol": "usuario"
 }
 ```
 
-**Respuesta:**
+**Response:**
 ```json
 {
   "success": true,
   "message": "Usuario registrado exitosamente",
   "data": {
-    "id": "uuid",
-    "nombre": "Juan Pérez",
-    "email": "juan@example.com",
+    "id": "uuid-generado",
+    "nombre": "Viviana Campos",
+    "email": "viviana@example.com",
     "birthday": "1990-01-01T00:00:00.000Z",
-    "photo": "https://...",
+    "photo": "https://ejemplo.com/foto.jpg",
     "rol": "usuario"
   }
 }
 ```
 
-#### Login
-```http
-POST /api/usuarios/login
-Content-Type: application/json
+---
 
+#### 2. Login
+
+**POST** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/usuarios/login`
+
+**Request:**
+```json
 {
   "email": "admin@mybook.com",
   "password": "admin123"
 }
 ```
 
-**Respuesta:**
+**Response:**
 ```json
 {
   "success": true,
@@ -109,234 +72,217 @@ Content-Type: application/json
 }
 ```
 
-#### Obtener Perfil
-```http
-GET /api/usuarios/{id}
-```
+---
 
-#### Actualizar Perfil
-```http
-PUT /api/usuarios/{id}
-Content-Type: application/json
+#### 3. Obtener Perfil de Usuario
 
+**GET** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/usuarios/{id}`
+
+**Response:**
+```json
 {
-  "nombre": "Nuevo Nombre",
-  "birthday": "1990-01-01",
-  "photo": "https://..."
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "nombre": "Viviana Campos",
+    "email": "viviana123@gmail.com",
+    "birthday": "1990-01-01T00:00:00.000Z",
+    "photo": "https://ejemplo.com/foto.jpg",
+    "rol": "usuario"
+  }
 }
 ```
 
-#### Eliminar Cuenta
-```http
-DELETE /api/usuarios/{id}
+---
+
+#### 4. Actualizar Perfil
+
+**PUT** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/usuarios/{id}`
+
+**Request:**
+```json
+{
+  "nombre": "Viviana Campos",
+  "email": "viviana123@gmail.com",
+  "birthday": "1990-01-01",
+  "photo": "https://ejemplo.com/nueva-foto.jpg"
+}
 ```
 
-#### Obtener Todos los Usuarios (Admin)
-```http
-GET /api/usuarios
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuario actualizado exitosamente",
+  "data": {
+    "id": "uuid",
+    "nombre": "Viviana Campos",
+    "email": "viviana123@gmail.com",
+    "birthday": "1990-01-01T00:00:00.000Z",
+    "photo": "https://ejemplo.com/nueva-foto.jpg",
+    "rol": "usuario"
+  }
+}
+```
+
+---
+
+#### 5. Eliminar Cuenta
+
+**DELETE** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/usuarios/{id}`
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuario eliminado exitosamente"
+}
+```
+
+---
+
+#### 6. Obtener Todos los Usuarios
+
+**GET** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/usuarios`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid-1",
+      "nombre": "Viviana Campos",
+      "email": "viviana@example.com",
+      "birthday": "1990-01-01T00:00:00.000Z",
+      "photo": "https://ejemplo.com/foto.jpg",
+      "rol": "usuario"
+    },
+    {
+      "id": "admin-001",
+      "nombre": "Administrador",
+      "email": "admin@mybook.com",
+      "birthday": null,
+      "photo": null,
+      "rol": "admin"
+    }
+  ]
+}
 ```
 
 ---
 
 ### LIBROS
 
-#### Obtener Libros Públicos
-```http
-GET /api/libros?usuarioId={id}
-```
+#### 7. Obtener Libros
 
-**Query Params:**
-- `usuarioId` (opcional): Filtra libros no eliminados por ese usuario
+**GET** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/libros?usuarioId={id}`
 
-#### Obtener Libro por ID
-```http
-GET /api/libros/{id}?usuarioId={id}
-```
-
-#### Buscar por Título
-```http
-GET /api/libros/buscar/titulo/{titulo}?usuarioId={id}
-```
-
-#### Obtener Libros por Usuario
-```http
-GET /api/libros/usuario/{usuarioId}
-```
-
-#### Crear Libro
-```http
-POST /api/libros
-Content-Type: application/json
-
+**Response:**
+```json
 {
+  "success": true,
+  "data": [
+    {
+      "libroId": "uuid",
+      "titulo": "El Quijote",
+      "autor": "Miguel de Cervantes",
+      "genero": "Clásico",
+      "descripcion": "Novela clásica española",
+      "añoPublicacion": 1605,
+      "editorial": "Editorial",
+      "idioma": "Español",
+      "numeroPaginas": 500,
+      "imagenUrl": "https://...",
+      "pdfUrl": "https://...",
+      "usuarioId": "admin-001"
+    }
+  ]
+}
+```
+
+---
+
+#### 11. Registrar Libro
+
+**POST** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/libros`
+
+**Request:**
+```json
+{
+  "usuarioId": "admin-001",
   "titulo": "El Quijote",
   "autor": "Miguel de Cervantes",
+  "genero": "Clásico",
   "descripcion": "Novela clásica española",
-  "photo": "https://...",
-  "rutaPdf": "https://...",
-  "usuarioId": "admin-001"
+  "añoPublicacion": 1605,
+  "editorial": "Editorial",
+  "idioma": "Español",
+  "numeroPaginas": 500,
+  "imagenUrl": "https://...",
+  "pdfUrl": "https://..."
 }
 ```
 
-#### Actualizar Libro
-```http
-PUT /api/libros/{id}
-Content-Type: application/json
-
+**Response:**
+```json
 {
-  "titulo": "Nuevo Título",
-  "autor": "Nuevo Autor",
-  "usuarioId": "admin-001"
-}
-```
-
-#### Eliminar Libro
-```http
-DELETE /api/libros/{id}
-Content-Type: application/json
-
-{
-  "usuarioId": "admin-001"
-}
-```
-
-**Nota:** Si el usuario es dueño del libro, se elimina permanentemente. Si no, se oculta de su biblioteca.
-
-#### Restaurar Libro
-```http
-PATCH /api/libros/{id}/restaurar
-Content-Type: application/json
-
-{
-  "usuarioId": "admin-001"
-}
-```
-
-#### Obtener Todos los Libros (Admin)
-```http
-GET /api/libros/admin/todos
-```
-
----
-
-### ARCHIVOS (Azure Blob Storage)
-
-#### Subir Archivos
-```http
-POST /api/archivos/subir
-Content-Type: multipart/form-data
-
-Form Data:
-- imagen: (file) - Requerido
-- pdf: (file) - Opcional
-- titulo: "Mi Libro"
-- autor: "Autor"
-- descripcion: "Descripción"
-- usuarioId: "admin-001"
-```
-
-**Respuesta:** Devuelve el libro creado con URLs de Azure
-
-#### Eliminar Archivo
-```http
-DELETE /api/archivos/eliminar
-Content-Type: application/json
-
-{
-  "url": "https://mybookstoragecristy.blob.core.windows.net/...",
-  "tipo": "imagen"
+  "success": true,
+  "message": "Libro creado exitosamente",
+  "data": {
+    "libroId": "uuid-generado",
+    "titulo": "El Quijote",
+    "autor": "Miguel de Cervantes",
+    "usuarioId": "admin-001"
+  }
 }
 ```
 
 ---
 
-## Estructura del Proyecto
+#### 13. Eliminar Libro
 
-```
-API- My Book/
-├── server.js              # Entrada principal
-├── controllers.js         # Todos los controllers
-├── routes.js             # Todas las rutas
-├── middlewares.js        # Middlewares
-├── models/
-│   ├── Usuario.js
-│   └── Libro.js
-├── data/
-│   └── database.js
-├── scripts/
-│   └── inicializarDatosConDrive.js
-└── .env
-```
+**DELETE** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/libros/{id}`
 
-## Base de Datos
-
-### Modelo Usuario
-```javascript
+**Request:**
+```json
 {
-  id: String (UUID),
-  nombre: String,
-  email: String (único),
-  password: String (hasheado),
-  birthday: Date,
-  photo: String (URL),
-  rol: String (usuario|admin)
+  "usuarioId": "admin-001"
 }
 ```
 
-### Modelo Libro
-```javascript
+**Response:**
+```json
 {
-  id: String (UUID),
-  titulo: String,
-  autor: String,
-  descripcion: String,
-  photo: String (URL Azure),
-  rutaPdf: String (URL Azure),
-  usuarioId: String,
-  esPublico: Boolean,
-  usuariosQueLoEliminaron: [String]
+  "success": true,
+  "message": "Libro eliminado exitosamente"
 }
 ```
-
-## Autenticación
-
-Envía `usuarioId` en:
-  - Body para POST/PUT/DELETE
-  - Params para GET `/usuarios/{id}`
-  - Query params para filtros `?usuarioId=xxx`
-
-## Despliegue en Azure
-
-1. Crear App Service en Azure
-2. Configurar variables de entorno en Azure Portal
-3. Desplegar con VS Code Azure Extension
-
-**Variables de entorno requeridas en Azure:**
-- `MONGODB_URI`
-- `AZURE_STORAGE_CONNECTION_STRING`
-- `AZURE_STORAGE_CONTAINER_IMAGENES`
-- `AZURE_STORAGE_CONTAINER_PDFS`
-- `PORT`
-
-## Datos Iniciales
-
-Al ejecutar `node scripts/inicializarDatosConDrive.js`:
-
-- 1 Usuario Admin: `admin@mybook.com` / `admin123`
-- 5 Libros de Lisa Kleypas con enlaces de Google Drive
-
-## Tecnologías
-
-- Node.js + Express 5.x
-- Azure Cosmos DB (MongoDB API)
-- Azure Blob Storage
-- Multer (upload de archivos)
-- bcryptjs (hash de contraseñas)
-- UUID (identificadores únicos)
 
 ---
 
-**Versión:** 2.0.0
+
+---
+
+#### 15. Obtener Todos los Libros
+
+**GET** `https://mybook-api-cristywilson-h2csd6hngtccbygu.eastus-01.azurewebsites.net/api/libros/admin/todos`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "libroId": "uuid",
+      "titulo": "Libro 1",
+      "autor": "Autor 1",
+      "eliminado": false
+    }
+  ]
+}
+```
+
 
 
 
