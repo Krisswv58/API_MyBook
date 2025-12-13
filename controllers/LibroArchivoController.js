@@ -3,9 +3,7 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 const multer = require('multer');
 const Libro = require('../models/Libro');
 
-// ============================================
-// CONFIGURACIÓN DE MULTER
-// ============================================
+
 const storage = multer.memoryStorage();
 
 const upload = multer({

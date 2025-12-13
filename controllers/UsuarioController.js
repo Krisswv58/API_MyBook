@@ -3,8 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const Usuario = require('../models/Usuario');
 
 class UsuarioController {
-    
-    // Registro de usuario
+
     static async registro(req, res) {
         try {
             const { nombre, email, password, birthday, photo, rol } = req.body;

@@ -1,6 +1,6 @@
 const Usuario = require('../models/Usuario');
 
-// Middleware para validar que el usuario existe
+
 const validarUsuario = async (req, res, next) => {
     try {
         const usuarioId = req.body.usuarioId || req.params.id || req.query.usuarioId;
